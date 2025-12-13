@@ -164,10 +164,6 @@ The frontend proxies requests to the backend API:
 
 ## 7. Configuration
 
-### Backend Github Link
-
-Github  - https://github.com/Belide-Aakash/insurance-fraud-detection-graph-backend
-
 ### Backend URL
 
 The frontend connects to the backend via the `BACKEND_URL` environment variable in `.env`:
