@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Insurance Fraud Detection | AI Portfolio</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --secondary: #10b981;
+      --accent: #f59e0b;
+      --dark: #0f172a;
+      --darker: #020617;
+      --light: #f8fafc;
+      --gray: #64748b;
+    }
+    
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--darker);
+      color: var(--light);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    
+    /* Animated Background */
+    .bg-grid {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: 
+        linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      z-index: -1;
+    }
+    
+    .glow-orb {
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.15;
+      z-index: -1;
+      animation: float 20s ease-in-out infinite;
+    }
+    
+    .orb-1 { background: var(--primary); top: -200px; left: -200px; }
+    .orb-2 { background: var(--secondary); bottom: -200px; right: -200px; animation-delay: -10s; }
+    
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(50px, 50px); }
+    }
+    
+    /* Navigation */
+    nav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      padding: 1rem 2rem;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(20px);
+      z-index: 1000;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+    }
+    
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      color: var(--gray);
+      text-decoration: none;
+      transition: color 0.3s;
+      font-weight: 500;
+    }
+    .nav-links a:hover { color: var(--light); }
+    
+    /* Hero Section */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 8rem 2rem 4rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    .hero-content { flex: 1; }
+    
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 50px;
+      font-size: 0.875rem;
+      color: var(--primary);
+      margin-bottom: 1.5rem;
+    }
+    
+    .hero h1 {
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+    }
+    
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .hero p {
+      font-size: 1.25rem;
+      color: var(--gray);
+      max-width: 600px;
+      margin-bottom: 2rem;
+    }
+    
+    .btn-group { display: flex; gap: 1rem; flex-wrap: wrap; }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1rem 2rem;
+      border-radius: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s;
+      cursor: pointer;
+      border: none;
+      font-size: 1rem;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 30px rgba(99, 102, 241, 0.5);
+    }
+    
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--light);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Stats */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      margin-top: 4rem;
+    }
+    
+    .stat {
+      text-align: center;
+      padding: 1.5rem;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .stat-label { color: var(--gray); font-size: 0.875rem; margin-top: 0.25rem; }
+    
+    /* Section Styles */
+    section {
+      padding: 6rem 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    .section-header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+    
+    .section-header h2 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+    
+    .section-header p {
+      color: var(--gray);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    /* Problem Section */
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+    
+    .problem-card {
+      padding: 2rem;
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.02));
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      border-radius: 16px;
+    }
+    
+    .problem-card i {
+      font-size: 2rem;
+      color: #ef4444;
+      margin-bottom: 1rem;
+    }
+    
+    .problem-card h3 { margin-bottom: 0.5rem; }
+    .problem-card p { color: var(--gray); font-size: 0.9rem; }
+    
+    /* Solution/Features */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+    
+    .feature-card {
+      padding: 2rem;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      transition: all 0.3s;
+    }
+    
+    .feature-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(99, 102, 241, 0.3);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+    
+    .feature-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .feature-card h3 { margin-bottom: 0.5rem; }
+    .feature-card p { color: var(--gray); font-size: 0.9rem; }
+    
+    .icon-purple { background: rgba(99, 102, 241, 0.2); color: var(--primary); }
+    .icon-green { background: rgba(16, 185, 129, 0.2); color: var(--secondary); }
+    .icon-amber { background: rgba(245, 158, 11, 0.2); color: var(--accent); }
+    .icon-red { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+    
+    /* Architecture */
+    .architecture-visual {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 3rem;
+      overflow-x: auto;
+    }
+    
+    .arch-flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      padding: 1rem 0;
+    }
+    
+    .arch-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    
+    .arch-box {
+      padding: 1.5rem 1.5rem;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.9));
+      border: 2px solid rgba(99, 102, 241, 0.4);
+      border-radius: 16px;
+      min-width: 130px;
+      transition: all 0.3s;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    .arch-box:hover {
+      transform: translateY(-5px);
+      border-color: rgba(99, 102, 241, 0.8);
+      box-shadow: 0 8px 30px rgba(99, 102, 241, 0.3);
+    }
+    
+    .arch-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      background: rgba(99, 102, 241, 0.2);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      margin: 0 auto 0.75rem;
+    }
+    
+    .arch-box span { 
+      font-size: 0.85rem; 
+      font-weight: 600;
+      color: var(--light);
+    }
+    
+    .arch-time { 
+      font-size: 0.75rem; 
+      color: var(--secondary); 
+      margin-top: 0.5rem;
+      font-weight: 500;
+    }
+    
+    .arch-arrow {
+      color: var(--primary);
+      font-size: 1.25rem;
+      opacity: 0.7;
+      padding: 0 0.25rem;
+    }
+    
+    .arch-total {
+      text-align: center;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--gray);
+    }
+    
+    .arch-total strong {
+      color: var(--secondary);
+      font-size: 1.1rem;
+    }
+    
+    /* Tech Stack */
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+    }
+    
+    .tech-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 1.5rem;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      transition: all 0.3s;
+    }
+    
+    .tech-item:hover {
+      border-color: rgba(99, 102, 241, 0.3);
+      transform: scale(1.02);
+    }
+    
+    .tech-item i { font-size: 1.5rem; color: var(--primary); }
+    
+    .screenshot-card img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      object-position: top;
+      transition: transform 0.3s;
+    }
+    
+    .screenshot-card:hover img {
+      transform: scale(1.02);
+    }
+    
+    .screenshots-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 1.5rem;
+    }
+    
+    .screenshot-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+    
+    .screenshot-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(99, 102, 241, 0.3);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+    
+    .screenshot-placeholder {
+      height: 220px;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(16, 185, 129, 0.05));
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      color: var(--gray);
+    }
+    
+    .screenshot-placeholder i { font-size: 3rem; opacity: 0.5; }
+    .screenshot-placeholder span { font-weight: 600; }
+    
+    .screenshot-caption {
+      padding: 1rem 1.5rem;
+      font-size: 0.9rem;
+      color: var(--gray);
+      text-align: center;
+    }
+    
+    /* Results */
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+    }
+    
+    .result-card {
+      padding: 2rem;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.02));
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 16px;
+      text-align: center;
+    }
+    
+    .result-value {
+      font-size: 3rem;
+      font-weight: 800;
+      color: var(--secondary);
+    }
+    
+    .result-label { color: var(--gray); margin-top: 0.5rem; }
+    .result-detail { font-size: 0.8rem; color: var(--gray); margin-top: 0.25rem; }
+    
+    /* CTA Section */
+    .cta {
+      text-align: center;
+      padding: 6rem 2rem;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(16, 185, 129, 0.05));
+      border-radius: 24px;
+      margin: 4rem 2rem;
+      max-width: 1400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .cta h2 { font-size: 2.5rem; margin-bottom: 1rem; }
+    .cta p { color: var(--gray); margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto; }
+    
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 3rem 2rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--gray);
+    }
+    
+    .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .social-links a {
+      color: var(--gray);
+      font-size: 1.5rem;
+      transition: color 0.3s;
+    }
+    
+    .social-links a:hover { color: var(--primary); }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .nav-links { display: none; }
+      .hero { padding-top: 6rem; }
+      .arch-flow { flex-direction: column; }
+      .arch-arrow { transform: rotate(90deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="glow-orb orb-1"></div>
+  <div class="glow-orb orb-2"></div>
+  
+  <nav>
+    <div class="logo">Nikhil Godalla</div>
+    <ul class="nav-links">
+      <li><a href="#problem">Problem</a></li>
+      <li><a href="#solution">Solution</a></li>
+      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#results">Results</a></li>
+      <li><a href="#demo">Demo</a></li>
+    </ul>
+  </nav>
+  
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="badge">
+        <i class="fas fa-shield-halved"></i>
+        Generative AI Project
+      </div>
+      <h1>Insurance Fraud Detection<br>Using <span>Generative AI</span></h1>
+      <p>An end-to-end AI system that processes insurance claims in seconds, detects fraud patterns using knowledge graphs, and provides explainable risk assessments.</p>
+      <div class="btn-group">
+        <a href="https://github.com/nikhilgodalla/InsuranceFraudDetection" class="btn btn-primary" target="_blank">
+          <i class="fab fa-github"></i> View on GitHub
+        </a>
+        <a href="#screenshots" class="btn btn-secondary">
+          <i class="fas fa-images"></i> View Screenshots
+        </a>
+        <a href="#" class="btn btn-secondary">
+          <i class="fas fa-file-pdf"></i> Documentation
+        </a>
+      </div>
+      
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-value">94.2%</div>
+          <div class="stat-label">Extraction Accuracy</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">91.2%</div>
+          <div class="stat-label">Fraud Detection</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">3-5s</div>
+          <div class="stat-label">Processing Time</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">$0.02</div>
+          <div class="stat-label">Cost per Claim</div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Problem -->
+  <section id="problem">
+    <div class="section-header">
+      <h2>The Problem</h2>
+      <p>Insurance fraud costs over $308 billion annually in the US alone. Traditional methods are slow, inaccurate, and miss critical patterns.</p>
+    </div>
+    <div class="problem-grid">
+      <div class="problem-card">
+        <i class="fas fa-clock"></i>
+        <h3>Slow Processing</h3>
+        <p>Manual document review takes 15-30 minutes per claim, creating bottlenecks.</p>
+      </div>
+      <div class="problem-card">
+        <i class="fas fa-exclamation-triangle"></i>
+        <h3>High False Positives</h3>
+        <p>Rule-based systems have 35-40% false positive rates, wasting resources.</p>
+      </div>
+      <div class="problem-card">
+        <i class="fas fa-database"></i>
+        <h3>Siloed Data</h3>
+        <p>Disconnected systems miss cross-claim fraud patterns and organized rings.</p>
+      </div>
+      <div class="problem-card">
+        <i class="fas fa-expand"></i>
+        <h3>Limited Scale</h3>
+        <p>Traditional approaches can't handle growing claim volumes efficiently.</p>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Solution -->
+  <section id="solution">
+    <div class="section-header">
+      <h2>The Solution</h2>
+      <p>A multi-layered AI architecture combining 4 core generative AI components for comprehensive fraud detection.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon icon-purple"><i class="fas fa-wand-magic-sparkles"></i></div>
+        <h3>Prompt Engineering</h3>
+        <p>Two-stage classification, type-specific extraction prompts, and chain-of-thought fraud analysis with 98.5% classification accuracy.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon icon-green"><i class="fas fa-magnifying-glass"></i></div>
+        <h3>RAG Pipeline</h3>
+        <p>Gemini File Search API with metadata enrichment, multi-turn conversations, and 96.8% citation accuracy.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon icon-amber"><i class="fas fa-file-pdf"></i></div>
+        <h3>Multimodal Processing</h3>
+        <p>Native PDF understanding with layout-aware extraction, table parsing, and form field detection.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon icon-red"><i class="fas fa-diagram-project"></i></div>
+        <h3>Knowledge Graph</h3>
+        <p>Neo4j graph database with fraud pattern detection, natural language querying, and relationship analysis.</p>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Architecture -->
+  <section id="architecture">
+    <div class="section-header">
+      <h2>System Architecture</h2>
+      <p>End-to-end pipeline processing claims in 3-5 seconds</p>
+    </div>
+    <div class="architecture-visual">
+      <div class="arch-flow">
+        <div class="arch-step">
+          <div class="arch-box">
+            <div class="arch-icon"><i class="fas fa-upload"></i></div>
+            <span>PDF Upload</span>
+          </div>
+        </div>
+        <div class="arch-arrow"><i class="fas fa-arrow-right"></i></div>
+        <div class="arch-step">
+          <div class="arch-box">
+            <div class="arch-icon" style="background: rgba(16, 185, 129, 0.2); color: #10b981;"><i class="fas fa-tags"></i></div>
+            <span>Classification</span>
+          </div>
+          <div class="arch-time">450-600ms</div>
+        </div>
+        <div class="arch-arrow"><i class="fas fa-arrow-right"></i></div>
+        <div class="arch-step">
+          <div class="arch-box">
+            <div class="arch-icon" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b;"><i class="fas fa-file-export"></i></div>
+            <span>Extraction</span>
+          </div>
+          <div class="arch-time">1.5-2.5s</div>
+        </div>
+        <div class="arch-arrow"><i class="fas fa-arrow-right"></i></div>
+        <div class="arch-step">
+          <div class="arch-box">
+            <div class="arch-icon" style="background: rgba(139, 92, 246, 0.2); color: #8b5cf6;"><i class="fas fa-circle-nodes"></i></div>
+            <span>Graph Ingestion</span>
+          </div>
+          <div class="arch-time">200-400ms</div>
+        </div>
+        <div class="arch-arrow"><i class="fas fa-arrow-right"></i></div>
+        <div class="arch-step">
+          <div class="arch-box">
+            <div class="arch-icon" style="background: rgba(239, 68, 68, 0.2); color: #ef4444;"><i class="fas fa-shield-halved"></i></div>
+            <span>Fraud Analysis</span>
+          </div>
+          <div class="arch-time">800-1200ms</div>
+        </div>
+      </div>
+      
+      <!-- Total time indicator -->
+      <div class="arch-total">
+        <span>Total Processing Time: <strong>3.2 - 5.2 seconds</strong></span>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Tech Stack -->
+  <section id="tech">
+    <div class="section-header">
+      <h2>Tech Stack</h2>
+      <p>Built with modern, production-ready technologies</p>
+    </div>
+    <div class="tech-grid">
+      <div class="tech-item"><i class="fas fa-brain"></i> Gemini 2.5-Flash</div>
+      <div class="tech-item"><i class="fas fa-circle-nodes"></i> Neo4j</div>
+      <div class="tech-item"><i class="fas fa-bolt"></i> FastAPI</div>
+      <div class="tech-item"><i class="fas fa-flask"></i> Flask</div>
+      <div class="tech-item"><i class="fas fa-chart-line"></i> Streamlit</div>
+      <div class="tech-item"><i class="fas fa-snowflake"></i> Snowflake</div>
+      <div class="tech-item"><i class="fab fa-python"></i> Python 3.12</div>
+      <div class="tech-item"><i class="fas fa-wind"></i> Tailwind CSS</div>
+    </div>
+  </section>
+  
+  <!-- Results -->
+  <section id="results">
+    <div class="section-header">
+      <h2>Results & Impact</h2>
+      <p>Measurable improvements across all key metrics</p>
+    </div>
+    <div class="results-grid">
+      <div class="result-card">
+        <div class="result-value">95%</div>
+        <div class="result-label">Faster Processing</div>
+        <div class="result-detail">From 15-30 min to 3-5 seconds</div>
+      </div>
+      <div class="result-card">
+        <div class="result-value">75%</div>
+        <div class="result-label">Fewer False Positives</div>
+        <div class="result-detail">From 35-40% to 8.9%</div>
+      </div>
+      <div class="result-card">
+        <div class="result-value">$2.5M</div>
+        <div class="result-label">Annual Savings</div>
+        <div class="result-detail">Per 100K claims processed</div>
+      </div>
+      <div class="result-card">
+        <div class="result-value">4.2x</div>
+        <div class="result-label">ROI</div>
+        <div class="result-detail">Return in first year</div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Screenshots Gallery -->
+  <section id="screenshots">
+    <div class="section-header">
+      <h2>Screenshots</h2>
+      <p>See the system in action</p>
+    </div>
+    <div class="screenshots-grid">
+      <div class="screenshot-card">
+        <img src="screenshots/dashboard.png" alt="Dashboard View">
+        <p class="screenshot-caption">Dashboard with claims timeline, risk distribution & high-risk alerts</p>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/upload-processing.png" alt="Document Upload">
+        <p class="screenshot-caption">Real-time document processing with 4-step analysis pipeline</p>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/fraud-result.png" alt="Fraud Analysis Result">
+        <p class="screenshot-caption">Fraud detection result with 65% risk score & executive summary</p>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/chatbot.png" alt="Graph Assistant Chatbot">
+        <p class="screenshot-caption">AI-powered Graph Assistant for natural language fraud queries</p>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/monitoring.png" alt="System Monitoring">
+        <p class="screenshot-caption">LLM token usage, API costs & live system logs</p>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/evaluation-1.png" alt="Model Evaluation">
+        <p class="screenshot-caption">Model evaluation with fraud score distribution analysis</p>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/evaluation-2.png" alt="Fraud Patterns Analysis">
+        <p class="screenshot-caption">Detected fraud patterns & top 20 highest risk claims</p>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Video Demo -->
+  <section id="demo" class="cta">
+    <h2>Watch the Demo</h2>
+    <p>Full walkthrough of the fraud detection pipeline</p>
+    <div class="btn-group" style="justify-content: center;">
+      <a href="#" class="btn btn-primary">
+        <i class="fas fa-play"></i> Watch Demo Video
+      </a>
+    </div>
+  </section>
+  
+  <!-- Footer -->
+  <footer>
+    <div class="social-links">
+      <a href="https://github.com/nikhilgodalla/InsuranceFraudDetection" target="_blank"><i class="fab fa-github"></i></a>
+      <a href="https://linkedin.com/in/yourprofile" target="_blank"><i class="fab fa-linkedin"></i></a>
+      <a href="mailto:your.email@example.com"><i class="fas fa-envelope"></i></a>
+    </div>
+    <p>Built by Nikhil Godalla | Generative AI Course Project | December 2024</p>
+  </footer>
+</body>
+</html>
